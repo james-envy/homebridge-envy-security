@@ -33,7 +33,7 @@
       "securityPort": {
         "title": "Security Address",
         "type": "integer",
-        "default": 12322,
+        "default": 12321,
         "required": true
       },
       "javaAddress": {

@@ -117,7 +117,7 @@ export class EnvySecurityPlatform implements DynamicPlatformPlugin {
           _this.client.connect(_this.config.securityPort, _this.config.securityAddress);
           //_this.log.info(_this.config.securityPort + ':' + _this.config.securityAddress);
         }  else if (typeof(this.config.javaPort) === 'undefined') {
-          this.client.connect(12322);
+          this.client.connect(12321);
           //this.log.info(12321 + '[:' + localhost + ']');
         } else {
           _this.client.connect(this.config.javaPort, this.config.javaAddress);
