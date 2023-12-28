@@ -1,7 +1,7 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { SecuritySystem2 } from './SecuritySystem2';
+import { SecuritySystem } from './SecuritySystem';
 import { MotionSensor } from './MotionSensor';
 import { ContactSensor } from './ContactSensor';
 import { Door } from './Door';
@@ -24,7 +24,7 @@ enum AccessoryType {
   SWITCH = 5
 }
 
-export class EnvySecurity2Platform implements DynamicPlatformPlugin {
+export class EnvySecurityPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
   
@@ -44,13 +44,8 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
   
   client = new Socket;
   private client_data = '';
-
+  
   private ready_timer;
-<<<<<<< HEAD
-=======
-
-  private first_ready = false;
->>>>>>> 80f4f5ca1d0266442633255587d8bc7b4d1aaf9b
   
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -102,129 +97,11 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
           //this.log.info(this.config.javaPort + ':' + this.config.javaAddress);
         }
       });
-<<<<<<< HEAD
-      this.client.on('timeout', () => {
-        this.on_timeout(this);
-      });
-      this.client.on('error', () => {
-        this.on_error(this);
-      });
-      this.client.on('connect', () => {
-        this.on_connect(this);
-      });
-      this.client.on('ready', () => {
-        this.on_ready(this);
-      });
-      this.client.on('data', (data) => {
-        this.on_data(this, data);
-      });
-      this.client.setTimeout(60000);
-      //this.log.info('alarmType:', this.config.alarmType);
-      if (this.config.alarmType === 'HOMEBRIDGE') {
-        this.client.connect(this.config.securityPort, this.config.securityAddress);
-        //this.log.info(this.config.securityPort + ':' + this.config.securityAddress);
-        } else if (typeof(this.config.javaPort) === 'undefined') {
-          this.client.connect(12322);
-          //this.log.info(12321 + '[:' + localhost + ']');
-      } else {
-          this.client.connect(this.config.javaPort, this.config.javaAddress);
-          //this.log.info(this.config.javaPort + ':' + this.config.javaAddress);
-      }
-    });
-  }
-
-  on_timeout(_this: this) : void {
-    _this.log.info('TIMEOUT');
-    _this.client.destroy();
-  }
-
-  on_close(_this: this) : void {
-    _this.log.info('CLOSE');
-      if (typeof _this.ready_timer !== undefined) {
-        _this.log.info('*** CANCELLING TIMEOUT ***');
-        clearTimeout(_this.ready_timer);
-        _this.ready_timer = undefined;
-      }
-    setTimeout(() => {
-      //_this.log.info('alarmType:', _this.config.alarmType);
-      if (_this.config.alarmType === 'HOMEBRIDGE') {
-        _this.client.connect(_this.config.securityPort, _this.config.securityAddress);
-        //_this.log.info(_this.config.securityPort + ':' + _this.config.securityAddress);
-        }  else if (typeof(this.config.javaPort) === 'undefined') {
-          this.client.connect(12322);
-          //this.log.info(12321 + '[:' + localhost + ']');
-      } else {
-          _this.client.connect(this.config.javaPort, this.config.javaAddress);
-          //_this.log.info(this.config.javaPort + ':' + this.config.javaAddress);
-      }
-    }, 10000);
-  }
-
-  on_error(_this: this) : void {
-    _this.log.info('ERROR');
-  }
-
-  on_connect(_this: this) : void {
-    _this.log.info('CONNECTED');
-  }
-
-  on_ready(_this: this) : void {
-    _this.log.info('READY');
-    _this.client.write('Security_system::UpdateSecurityStatus(ControllerType = ' + _this.config.alarmType + ', ControllerAddress = '
-      + _this.config.securityAddress + ':' + _this.config.securityPort + ', ReadyZones = ' + _this.config.readyZones
-      + ', AlarmZones = ' + _this.config.alarmZones + ')\n');
-      _this.ready_timer = setTimeout(() => {
-      _this.on_ready(_this);
-    }, 15000);
-  }
-
-  on_data(_this: this, data: Buffer) : void {
-    _this.client_data += data;
-    let i = _this.client_data.indexOf('\n');
-    while (i !== -1) {
-      const line = _this.client_data.substring(0, i);
-      _this.client_data = _this.client_data.substring(i + 1);
-      _this.log.info('DATA "' + line + '"');
-      let result;
-      result = line.match(/^Security_system::PartitionStatus\(PartitionNumber = (\d+), CurrentPartitionArmingStatus = (.+)\)$/);
-      if (result !== null) {
-        //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-        const partition: SecuritySystem2 = _this.partitions[result[1]];
-        if (partition !== undefined) {
-            partition.setSecuritySystemCurrentState(result[2]);
-            partition.setSecuritySystemTargetState(result[2]);
-        }
-      }
-      result = line.match(/^Security_system::PartitionEvent\(PartitionNumber = (\d+), CurrentPartitionArmingEvent = (.+)\)$/);
-      if (result !== null) {
-        //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-        const partition: SecuritySystem2 = _this.partitions[result[1]];
-        if (partition !== undefined) {
-            partition.setSecuritySystemCurrentState(result[2]);
-            partition.setSecuritySystemTargetState(result[2]);
-        }
-      }
-      result = line.match(/^Security_system::PartitionReady\(PartitionNumber = (\d+), IsPartitionReady = (.+)\)$/);
-      if (result !== null) {
-        //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-      }
-      result = line.match(/^Security_system::PartitionAlarm\(PartitionNumber = (\d+), IsPartitionAlarmActive = (.+)\)$/);
-      if (result !== null) {
-        //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-        const partition: SecuritySystem2 = _this.partitions[result[1]];
-        if (partition !== undefined) {
-          switch (result[2]) {
-            case 'true':
-              partition.setSecuritySystemCurrentStateNum(this.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED);
-              break;
-          }
-=======
     }
     
     on_timeout(_this: this) : void {
       _this.log.info('TIMEOUT');
       _this.client.destroy();
-      this.first_ready = false;
     }
     
     on_close(_this: this) : void {
@@ -240,42 +117,31 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
           _this.client.connect(_this.config.securityPort, _this.config.securityAddress);
           //_this.log.info(_this.config.securityPort + ':' + _this.config.securityAddress);
         }  else if (typeof(this.config.javaPort) === 'undefined') {
-          this.client.connect(12321);
+          this.client.connect(12322);
           //this.log.info(12321 + '[:' + localhost + ']');
         } else {
           _this.client.connect(this.config.javaPort, this.config.javaAddress);
           //_this.log.info(this.config.javaPort + ':' + this.config.javaAddress);
         }
       }, 10000);
-      this.first_ready = false;
     }
     
     on_error(_this: this) : void {
       _this.log.info('ERROR');
-      this.first_ready = false;
     }
     
     on_connect(_this: this) : void {
       _this.log.info('CONNECTED');
-      this.first_ready = false;
     }
     
     on_ready(_this: this) : void {
       _this.log.info('READY');
-      _this.client.write('Security_system::UpdateSecurityStatus(ControllerType = ' + _this.config.alarmType + ', PCPassword = '
-      + _this.config.partitions[0].code + ', ControllerAddress = ' + _this.config.securityAddress + ':' + _this.config.securityPort + ', ReadyZones = ' + _this.config.readyZones
+      _this.client.write('Security_system::UpdateSecurityStatus(ControllerType = ' + _this.config.alarmType + ', ControllerAddress = '
+      + _this.config.securityAddress + ':' + _this.config.securityPort + ', ReadyZones = ' + _this.config.readyZones
       + ', AlarmZones = ' + _this.config.alarmZones + ')\n');
       _this.ready_timer = setTimeout(() => {
         _this.on_ready(_this);
       }, 15000);
-      if (this.first_ready == false) {
-        _this.client.write('Security_system::Configure(Alarm_Address = ' + _this.config.alarmType.toLowerCase() + '; ip = ' + _this.config.securityAddress + '; port = ' + _this.config.securityPort + ')\n');
-        for (const partition in this.partition_zones) {
-          _this.client.write('Security_system::ConfigurePartition(Address = ' + partition + ')\n');
-        
-        }
-        this.first_ready = true;
-      }
     }
     
     on_data(_this: this, data: Buffer) : void {
@@ -307,7 +173,6 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
         result = line.match(/^Security_system::PartitionReady\(PartitionNumber = (\d+), IsPartitionReady = (.+)\)$/);
         if (result !== null) {
           //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
->>>>>>> 80f4f5ca1d0266442633255587d8bc7b4d1aaf9b
         }
         result = line.match(/^Security_system::PartitionAlarm\(PartitionNumber = (\d+), IsPartitionAlarmActive = (.+)\)$/);
         if (result !== null) {
@@ -320,174 +185,94 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
               break;
             }
           }
-        }
-        result = line.match(/^Security_system::ZoneStatus\(ZoneNumber = (\d+), CurrentZoneStatus = (.+), ZoneSummary = (\d+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2] + ' 3: ' + result[3]);
-          const zone = _this.zones[result[1]];
-          if (zone !== undefined) {
-            //_this.log.info('zone_type:', _this.zone_types[result[1]]);
-            switch (_this.zone_types[result[1]]) {
-              case AccessoryType.MOTION_SENSOR:
+          result = line.match(/^Security_system::PartitionAlarm\(PartitionNumber = (\d+), IsPartitionAlarmActive = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
+            const partition: SecuritySystem = _this.partitions[result[1]];
+            if (partition !== undefined) {
               switch (result[2]) {
-                case 'Sealed':
-                zone.setMotionDetected(false);
-                break;
-                case 'Unsealed':
-                zone.setMotionDetected(true);
+                case 'true':
+                partition.setSecuritySystemCurrentStateNum(this.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED);
                 break;
               }
-              break;
-              case AccessoryType.CONTACT_SENSOR:
-              switch (result[2]) {
-                case 'Sealed':
-                zone.setContactSensorState(false);
-                break;
-                case 'Unsealed':
-                zone.setContactSensorState(true);
-                break;
-              }
-              break;
             }
           }
-          const outputs = _this.zone_outputs[result[1]];
-          for (const o in outputs) {
-            //_this.log.info('output:', o);
-            const output = _this.outputs[o];
-            if (output !== undefined) {
-              //_this.log.info('output.zone:', output.accessory.context.device.zone);
-              //_this.log.info('output_type:', _this.output_types[o]);
-              switch (_this.output_types[o]) {
-                case AccessoryType.DOOR:
-                case AccessoryType.GARAGE_DOOR_OPENER:
-                case AccessoryType.SWITCH:
+          result = line.match(/^Security_system::ZoneStatus\(ZoneNumber = (\d+), CurrentZoneStatus = (.+), ZoneSummary = (\d+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2] + ' 3: ' + result[3]);
+            const zone = _this.zones[result[1]];
+            if (zone !== undefined) {
+              //_this.log.info('zone_type:', _this.zone_types[result[1]]);
+              switch (_this.zone_types[result[1]]) {
+                case AccessoryType.MOTION_SENSOR:
                 switch (result[2]) {
                   case 'Sealed':
-                  output.setZoneState(false);
+                  zone.setMotionDetected(false);
                   break;
                   case 'Unsealed':
-                  output.setZoneState(true);
+                  zone.setMotionDetected(true);
+                  break;
+                }
+                break;
+                case AccessoryType.CONTACT_SENSOR:
+                switch (result[2]) {
+                  case 'Sealed':
+                  zone.setContactSensorState(false);
+                  break;
+                  case 'Unsealed':
+                  zone.setContactSensorState(true);
                   break;
                 }
                 break;
               }
             }
-          }
-        }
-        result = line.match(/^Security_system::ZoneBypass\(ZoneNumber = (\d+), IsZoneBypassed = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-        }
-        result = line.match(/^Security_system::OutputStatus\(OutputNumber = (\d+), IsOutputOn = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-          const output = _this.outputs[result[1]];
-          if (output !== undefined) {
-            switch (result[2]) {
-              case 'false':
-              output.setOutputState(false);
-              break;
-              case 'true':
-              output.setOutputState(true);
-              break;
+            const outputs = _this.zone_outputs[result[1]];
+            for (const o in outputs) {
+              //_this.log.info('output:', o);
+              const output = _this.outputs[o];
+              if (output !== undefined) {
+                //_this.log.info('output.zone:', output.accessory.context.device.zone);
+                //_this.log.info('output_type:', _this.output_types[o]);
+                switch (_this.output_types[o]) {
+                  case AccessoryType.DOOR:
+                  case AccessoryType.GARAGE_DOOR_OPENER:
+                  case AccessoryType.SWITCH:
+                  switch (result[2]) {
+                    case 'Sealed':
+                    output.setZoneState(false);
+                    break;
+                    case 'Unsealed':
+                    output.setZoneState(true);
+                    break;
+                  }
+                  break;
+                }
+              }
             }
           }
+          result = line.match(/^Security_system::ZoneBypass\(ZoneNumber = (\d+), IsZoneBypassed = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
+          }
+          result = line.match(/^Security_system::OutputStatus\(OutputNumber = (\d+), IsOutputOn = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
+            const output = _this.outputs[result[1]];
+            if (output !== undefined) {
+              switch (result[2]) {
+                case 'false':
+                output.setOutputState(false);
+                break;
+                case 'true':
+                output.setOutputState(true);
+                break;
+              }
+            }
+          }
+          i = _this.client_data.indexOf('\n');
         }
-        i = _this.client_data.indexOf('\n');
       }
     }
-<<<<<<< HEAD
-  }
-
-  /**
-  * This function is invoked when homebridge restores cached accessories from disk at startup.
-  * It should be used to setup event handlers for characteristics and update respective values.
-  */
-  configureAccessory(accessory: PlatformAccessory) : void {
-    //this.log.info('Loading accessory from cache:', accessory.displayName);
-
-    // add the restored accessory to the accessories cache so we can track if it has already been registered
-    this.accessories.push(accessory);
-  }
-
-  /**
-  * This is an example method showing how to register discovered accessories.
-  * Accessories must only be registered once, previously created accessories
-  * must not be registered again to prevent "duplicate UUID" errors.
-  */
-  discoverDevices() : void {
-
-    // generate a unique id for the accessory this should be generated from
-    // something globally unique, but constant, for example, the device serial
-    // number or MAC address
-
-    for (const partition of this.config.partitions) {
-      this.partition_zones[partition.number] = {};
-      this.partition_outputs[partition.number] = {};
-      //this.log.info('Creating partition:', partition.number);
-      const device = {
-        id: partition.number,
-        code: partition.code,
-        uniqueId: 'envy-security-partition' + partition.number,
-        displayName: partition.name,
-          stay_mode: partition.stay_mode,
-          away_mode: partition.away_mode,
-          night_mode: partition.night_mode,
-        log: this.log,
-      };
-
-      const uuid = this.api.hap.uuid.generate(device.uniqueId);
-
-      //for (const existingAccessory of this.accessories) {
-      //  this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-      //}
-
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-
-      if (existingAccessory) {
-        // the accessory already exists
-        //this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-        existingAccessory.context.device = device;
-
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        // existingAccessory.context.device = device;
-        this.api.updatePlatformAccessories([existingAccessory]);
-
-        // create the accessory handler for the restored accessory
-        // this is imported from `platformAccessory.ts`
-        this.partitions[partition.number] = new SecuritySystem2(this, existingAccessory);
-
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-      } else {
-        // the accessory does not yet exist, so we need to create it
-        //this.log.info('Adding new accessory:', this.config);
-
-        // create a new accessory
-        const accessory = new this.api.platformAccessory(device.displayName, uuid);
-
-        // store a copy of the device object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.device = device;
-
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        this.partitions[partition.number] = new SecuritySystem2(this, accessory);
-
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      }
-
-      for (const zone of partition.zones) {
-        this.partition_zones[partition.number][zone.number] = zone.type;
-        this.zone_types[zone.number] = zone.type;
-        //this.log.info('Creating zone:', zone.number);
-=======
     
     /**
     * This function is invoked when homebridge restores cached accessories from disk at startup.
@@ -515,7 +300,6 @@ export class EnvySecurity2Platform implements DynamicPlatformPlugin {
         this.partition_zones[partition.number] = {};
         this.partition_outputs[partition.number] = {};
         //this.log.info('Creating partition:', partition.number);
->>>>>>> 80f4f5ca1d0266442633255587d8bc7b4d1aaf9b
         const device = {
           id: partition.number,
           code: partition.code,

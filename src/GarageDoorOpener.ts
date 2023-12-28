@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
-import { EnvySecurity2Platform } from './platform';
+import { EnvySecurityPlatform } from './platform';
 
 /**
 * Platform Accessory
@@ -28,7 +28,7 @@ export class GarageDoorOpener {
   
   
   constructor(
-    private readonly platform: EnvySecurity2Platform,
+    private readonly platform: EnvySecurityPlatform,
     private readonly accessory: PlatformAccessory,
     ) {
       

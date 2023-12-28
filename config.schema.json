@@ -46,19 +46,6 @@
       "javaPort": {
         "title": "Java Address",
         "type": "integer",
-        "default": 12322,
-        "required": true
-      },
-      "javaAddress": {
-        "title": "Java Address",
-        "type": "string",
-        "format": "ipv4",
-        "default": "127.0.0.1",
-        "required": true
-      },
-      "javaPort": {
-        "title": "Java Address",
-        "type": "integer",
         "default": 12321,
         "required": true
       },

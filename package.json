@@ -1,16 +1,16 @@
 {
   "private": false,
-  "displayName": "Envy Security2",
-  "name": "homebridge-envy-security2",
-  "version": "1.0.5",
+  "displayName": "Envy Security",
+  "name": "homebridge-envy-security",
+  "version": "1.0.101",
   "description": "A short description about what your plugin does.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/james-envy/homebridge-envy-security2.git"
+    "url": "git://github.com/james-envy/homebridge-envy-security.git"
   },
   "bugs": {
-    "url": "https://github.com/james-envy/homebridge-envy-security2/issues"
+    "url": "https://github.com/james-envy/homebridge-envy-security/issues"
   },
   "engines": {
     "node": ">=14.18.1",
