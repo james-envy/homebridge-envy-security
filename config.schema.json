@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "EnvySecurity2Plugin",
+  "pluginAlias": "EnvySecurityPlugin",
   "pluginType": "platform",
   "singular": false,
   "schema": {
