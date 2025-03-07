@@ -107,21 +107,23 @@ export class GarageDoorOpener {
         if (this.accessory.context.device.target === 50) {
           target = 4;
         }
+        //this.platform.log.info("target =", target);
+      }
         
-        for (const output in this.platform.zone_outputs[this.accessory.context.device.zone]) {
-          if (Number(output) !== this.getId()) {
-            this.platform.outputs[output].abort();
-          }
+      for (const output in this.platform.zone_outputs[this.accessory.context.device.zone]) {
+        if (Number(output) !== this.getId()) {
+          this.platform.outputs[output].abort();
         }
-        this.platform.client.write('Security_system::OutputOn(OutputNumber = ' + this.getId() + '+2)\n');
-        if (target !== undefined && target !== this.targetDoorState) {
-          this.targetDoorState = target;
-          this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).setValue(target);
-        }
-        if (duration !== undefined) {
-          this.waiting = true;
-          this.timeout = setTimeout(() => this.stopWaiting(this), duration * 1000);
-        }
+      }
+      this.platform.log.info("WRITE", 'Security_system::OutputOn(OutputNumber = ' + this.getId() + '+2)\n');
+      this.platform.client.write('Security_system::OutputOn(OutputNumber = ' + this.getId() + '+2)\n');
+      if (target !== undefined && target !== this.targetDoorState) {
+        this.targetDoorState = target;
+        this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).setValue(target);
+      }
+      if (duration !== undefined) {
+        this.waiting = true;
+        this.timeout = setTimeout(() => this.stopWaiting(this), duration * 1000);
       }
       this.doUpdate();
     }
@@ -143,7 +145,7 @@ export class GarageDoorOpener {
     }
     
     setZoneState(state: boolean) : void {
-      //this.platform.log.info(this.getId() +' - setZoneState:', state);
+      this.platform.log.info(this.getId() +' - setZoneState:', state);
       if (this.zonePendingState !== undefined) {
         clearTimeout(this.zoneTimeout);
         this.platform.log.info(this.getId() +' - IGNORING:', this.zonePendingState);
@@ -154,24 +156,24 @@ export class GarageDoorOpener {
     }
     
     timeoutZoneState(_this: this) : void {
-      if (_this.zonePendingState !== _this.zoneState) {
-        this.platform.log.info(this.getId() +' - FINALISED:', this.zonePendingState);
-        _this.zoneState = _this.zonePendingState;
-        _this.doUpdate();
-      }
+      //if (_this.zonePendingState !== _this.zoneState) {
+      _this.platform.log.info(this.getId() +' - FINALISED:', this.zonePendingState);
+      _this.zoneState = _this.zonePendingState;
+      _this.doUpdate();
+      //}
       _this.zonePendingState = undefined;
     }
     
     setOutputState(state: boolean) : void {
-      //this.platform.log.info(this.getId() +' - setOutputState:', state);
-      if (state !== this.outputState) {
-        this.outputState = state;
-        if ((this.accessory.context.device.zone === undefined) || (this.accessory.context.device.zone === 0)) {
-          this.zoneState = state;
-        }
-        
-        this.doUpdate();
+      this.platform.log.info(this.getId() +' - setOutputState:', state);
+      //if (state !== this.outputState) {
+      this.outputState = state;
+      if ((this.accessory.context.device.zone === undefined) || (this.accessory.context.device.zone === 0)) {
+        this.zoneState = state;
       }
+        
+      this.doUpdate();
+      //}
     }
     
     abort() : void {

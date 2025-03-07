@@ -107,7 +107,7 @@ export class EnvySecurityPlatform implements DynamicPlatformPlugin {
     on_close(_this: this) : void {
       _this.log.info('CLOSE');
       if (typeof _this.ready_timer !== undefined) {
-        _this.log.info('*** CANCELLING TIMEOUT ***');
+          _this.log.info('*** CANCELLING TIMEOUT ***');
         clearTimeout(_this.ready_timer);
         _this.ready_timer = undefined;
       }
@@ -150,40 +150,30 @@ export class EnvySecurityPlatform implements DynamicPlatformPlugin {
       while (i !== -1) {
         const line = _this.client_data.substring(0, i);
         _this.client_data = _this.client_data.substring(i + 1);
-        _this.log.info('DATA "' + line + '"');
-        let result;
-        result = line.match(/^Security_system::PartitionStatus\(PartitionNumber = (\d+), CurrentPartitionArmingStatus = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-          const partition: SecuritySystem = _this.partitions[result[1]];
-          if (partition !== undefined) {
-            partition.setSecuritySystemCurrentState(result[2]);
-            partition.setSecuritySystemTargetState(result[2]);
-          }
-        }
-        result = line.match(/^Security_system::PartitionEvent\(PartitionNumber = (\d+), CurrentPartitionArmingEvent = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-          const partition: SecuritySystem = _this.partitions[result[1]];
-          if (partition !== undefined) {
-            partition.setSecuritySystemCurrentState(result[2]);
-            partition.setSecuritySystemTargetState(result[2]);
-          }
-        }
-        result = line.match(/^Security_system::PartitionReady\(PartitionNumber = (\d+), IsPartitionReady = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-        }
-        result = line.match(/^Security_system::PartitionAlarm\(PartitionNumber = (\d+), IsPartitionAlarmActive = (.+)\)$/);
-        if (result !== null) {
-          //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
-          const partition: SecuritySystem = _this.partitions[result[1]];
-          if (partition !== undefined) {
-            switch (result[2]) {
-              case 'true':
-              partition.setSecuritySystemCurrentStateNum(this.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED);
-              break;
+        if (i > 0) {
+          _this.log.info('DATA "' + line + '"');
+          let result;
+          result = line.match(/^Security_system::PartitionStatus\(PartitionNumber = (\d+), CurrentPartitionArmingStatus = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
+            const partition: SecuritySystem = _this.partitions[result[1]];
+            if (partition !== undefined) {
+              partition.setSecuritySystemCurrentState(result[2]);
+              partition.setSecuritySystemTargetState(result[2]);
             }
+          }
+          result = line.match(/^Security_system::PartitionEvent\(PartitionNumber = (\d+), CurrentPartitionArmingEvent = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
+            const partition: SecuritySystem = _this.partitions[result[1]];
+            if (partition !== undefined) {
+              partition.setSecuritySystemCurrentState(result[2]);
+              partition.setSecuritySystemTargetState(result[2]);
+            }
+          }
+          result = line.match(/^Security_system::PartitionReady\(PartitionNumber = (\d+), IsPartitionReady = (.+)\)$/);
+          if (result !== null) {
+            //_this.log.info('1: ' + result[1] + ' 2: ' + result[2]);
           }
           result = line.match(/^Security_system::PartitionAlarm\(PartitionNumber = (\d+), IsPartitionAlarmActive = (.+)\)$/);
           if (result !== null) {
@@ -234,7 +224,7 @@ export class EnvySecurityPlatform implements DynamicPlatformPlugin {
                 //_this.log.info('output.zone:', output.accessory.context.device.zone);
                 //_this.log.info('output_type:', _this.output_types[o]);
                 switch (_this.output_types[o]) {
-                  case AccessoryType.DOOR:
+                   case AccessoryType.DOOR:
                   case AccessoryType.GARAGE_DOOR_OPENER:
                   case AccessoryType.SWITCH:
                   switch (result[2]) {
@@ -269,8 +259,8 @@ export class EnvySecurityPlatform implements DynamicPlatformPlugin {
               }
             }
           }
-          i = _this.client_data.indexOf('\n');
         }
+        i = _this.client_data.indexOf('\n');
       }
     }
     
